@@ -30,7 +30,7 @@ sc
 ```
 
 ```{r}
-print(<)
+print("hellon word")
 ```
 
 
