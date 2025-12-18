@@ -1,0 +1,31 @@
+---
+title: "Risque de crédit"
+author: "Alioune Badara  Thiam"
+date: "2025-12-18"
+output: pdf_document
+---
+
+```{r}
+# packages 
+library(sparklyr)
+```
+# version 
+```{r}
+spark_available_versions()
+```
+# 
+```{r}
+spark_install(version = '3')
+
+```
+
+# connection locale à une version( clusters) : 
+
+```{r}
+sc= spark_connect( 
+         master = 'local', 
+         version= "3.5"
+    )
+```
+
+
