@@ -1,3 +1,4 @@
+
 ---
 title: "Risque de crédit"
 author: "Alioune Badara  Thiam"
@@ -5,22 +6,28 @@ date: "2025-12-18"
 output: pdf_document
 ---
 
-#  
+# 
 ```{r}
 # packages 
 library(sparklyr)
 library(dplyr)
 ```
+
 # les versions dispoibles :  
+
 ```{r}
 spark_available_versions()
 ```
+
 # installation d'un cluster  : 
+
 ```{r}
 spark_install(version = '3.5')
 
 ```
-# connection locale à une version( clusters) : 
+
+# connection locale à une version( clusters) :
+
 ```{r}
 sc= spark_connect( 
          master = 'local', 
@@ -28,24 +35,6 @@ sc= spark_connect(
     )
 sc
 ```
-
-```{r}
-print("hello word les enfant")
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

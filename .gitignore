@@ -1,0 +1,7 @@
+# Fichiers temporaires R
+.RData
+.Rhistory
+
+# Logs
+logs/
+*.log
