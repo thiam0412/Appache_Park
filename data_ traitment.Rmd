@@ -5,27 +5,49 @@ date: "2025-12-18"
 output: pdf_document
 ---
 
+#  
 ```{r}
 # packages 
 library(sparklyr)
+library(dplyr)
 ```
-# version 
+# les versions dispoibles :  
 ```{r}
 spark_available_versions()
 ```
-# 
+# installation d'un cluster  : 
 ```{r}
-spark_install(version = '3')
+spark_install(version = '3.5')
 
 ```
-
 # connection locale à une version( clusters) : 
-
 ```{r}
 sc= spark_connect( 
          master = 'local', 
          version= "3.5"
     )
+sc
 ```
+
+```{r}
+print(<)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
