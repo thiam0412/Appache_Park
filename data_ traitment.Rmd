@@ -5,22 +5,34 @@ date: "2025-12-18"
 output: pdf_document
 ---
 
-#  
+##  Modélisation du risque de crédit :  
+Dans ce projet , nous allons modéliser le risk de crédit en utilisant de frame multilangue 
+spark  et une application web  Rshiny .  
+
 ```{r}
 # packages 
 library(sparklyr)
 library(dplyr)
+library(tidymodels)
+library(Amelia)
+library(naniar)
 ```
+
 # les versions dispoibles :  
+
 ```{r}
 spark_available_versions()
 ```
+
 # installation d'un cluster  : 
+
 ```{r}
 spark_install(version = '3.5')
 
 ```
+
 # connection locale à une version( clusters) : 
+
 ```{r}
 sc= spark_connect( 
          master = 'local', 
@@ -29,15 +41,52 @@ sc= spark_connect(
 sc
 ```
 
+# Lecture des données dans spak  :   
 ```{r}
-print(les )
+df = spark_read_csv(
+              sc,
+              path = "credit_risk_dataset.csv", 
+              header =TRUE, # indique la première de df correspond aux variables 
+              delimiter = ","  
+            )
+df%>% 
+ head()
 ```
 
+# type de données  
+```{r}
+ # class 
+ class(df)
+```
+Bien que on a un objet spark main on peut pas un dataframe R , main, on peut utiliser 
+un fonction de R(dplyr) pour manipuler spark   : 
 
+# dimension de df :  
+```{r}
+# le nombre de col :
+ sdf_ncol(df)
+ # nombe de ligne :
+ sdf_nrow(df)
+```
 
+# stucture des données : 
+```{r}
+df %>% 
+  glimpse()
+```
+# Description de données  : 
 
+```{r}
+sdf_describe(df)
+```
 
-
+## Analyse des donnéées  et traitement des données  :
+ analyse des graphqure: 
+```{r}
+NbrMissingValues= function(col){ 
+                 df%> 
+  }
+```
 
 
 
