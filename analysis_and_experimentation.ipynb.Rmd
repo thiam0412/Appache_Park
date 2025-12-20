@@ -1,0 +1,175 @@
+---
+title: "Risque de crédit"
+author: "Alioune Badara  Thiam"
+date: "2025-12-18"
+output: pdf_document
+---
+
+## Modélisation du risque de crédit :  
+Dans ce projet , nous allons modéliser le risk de crédit en utilisant de frame multilangue 
+spark  et une application web  Rshiny .  
+
+
+# Dans ce fichier nous allons analyser les données et tester les methode qu'il faut pour le pipline 
+finale. 
+```{r}
+# packages 
+library(sparklyr)
+library(dplyr)
+library(tidymodels)
+library(Amelia)
+library(naniar)
+```
+
+# les versions dispoibles :  
+
+```{r}
+spark_available_versions()
+```
+
+# installation d'un cluster  : 
+
+```{r}
+spark_install(version = '3.5')
+
+```
+
+# connection locale à une version( clusters) : 
+
+```{r}
+sc= spark_connect( 
+         master = 'local', 
+         version= "3.5"
+    )
+sc
+```
+
+# Lecture des données dans spak  :   
+```{r}
+df = spark_read_csv(
+              sc,
+              path = "credit_risk_dataset.csv", 
+              header =TRUE, # indique la première de df correspond aux variables 
+              delimiter = ","  
+            )
+df%>% 
+ head()
+```
+
+# type de données  :  
+
+```{r}
+ # class 
+ class(df)
+```
+Bien que on a un objet spark main on peut pas un dataframe R , main, on peut utiliser 
+un fonction de R(dplyr) pour manipuler spark   : 
+
+# dimension de df :  
+```{r}
+# le nombre de col :
+ sdf_ncol(df)
+ # nombe de ligne :
+ sdf_nrow(df)
+```
+
+# stucture des données : 
+```{r}
+df %>% 
+  glimpse()
+```
+# Description de données  : 
+```{r}
+sdf_describe(df)
+```
+
+## Analyse des donnéées : 
+ 
+ Analyse des données manquantes :  
+ 
+```{r}
+df%>% 
+    mutate_all(is.na) %>%
+    mutate_all(as.numeric) %>%
+    summarise_all(mean) %>%
+    collect()
+```
+# On voit bien qu'il ya que deux colonne qui ont des valeurs manquantes  :   
+
+# Analyse des de la variables : 
+
+```{r}
+df%>% 
+  group_by(loan_status)%>%
+  summarise(n=n())%>%
+  mutate(prop=n/sum(n)*100) 
+```
+ Numériquement, on voit un desequilibre de class ( choix de modèles adaptés à la modélisation ): 
+ 
+```{r} 
+load_status_plot= df%>% 
+              select(loan_status)%>%
+              collect()
+ggplot(load_status_plot, aes(loan_status))+
+       geom_histogram() 
+```
+
+
+## Méthode de traitment de données (méthode à  mettre  dans le pipline)  
+Imputation par la median :  
+```{r}
+ mediane_load_rate=df%>% 
+  summarise(mediane_load_rate=median(loan_int_rate,na.rm = TRUE))%>%  
+  pull(mediane_load_rate)
+
+mediane_person=df%>% 
+  summarise(mediane_person=median(person_emp_length ,na.rm = TRUE))%>%  
+  pull(mediane_person)
+
+ df_imputed=df%>% 
+    mutate(
+      loan_int_rate = ifelse(is.na(loan_int_rate),mediane_load_rate,loan_int_rate),
+      person_emp_length =ifelse(is.na(person_emp_length),mediane_person,person_emp_length)
+      )
+   
+```
+
+# Verification de la l'imputation : 
+   
+```{r}
+df_imputed%>% 
+    mutate_all(is.na) %>%
+    mutate_all(as.numeric) %>%
+    summarise_all(mean) %>%
+    collect()
+```
+
+# Regarder si on a la meme distribustion avant et apres distribustion  : 
+
+```{r}
+plot_load_rate=df%>%
+         select(loan_int_rate)%>% 
+         collect()
+
+ggplot(load_status_plot,aes(l))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
