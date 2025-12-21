@@ -11,11 +11,11 @@ pipline=ml_pipeline(sc) %>%
       # imputation des valeurs manquantes par la médiane 
       ft_imputer(
             input_cols =c(
-              " load_int_rate", 
+              "loan_int_rate", 
               "person_emp_length"
             ),
             output_cols =c( 
-               "imputer_load_int_rate", 
+               "imputer_loan_int_rate", 
                "imputer_person_emp_length"
               ), 
             strategy = "median"
@@ -39,32 +39,35 @@ pipline=ml_pipeline(sc) %>%
           output_col="cb_person_default_on_file_indexed"
             )%>%
     ft_one_hot_encoder(
-            input_cols =c("cb_person_default_on_file_encoded", 
+            input_cols =c("cb_person_default_on_file_indexed", 
                           "loan_intent_indexed", 
                           "loan_grade_indexed",
-                          "loan_grade_indexed"
+                          "person_home_ownership_indexed"
                           ), 
             output_cols =c("cb_person_default_on_file_encoded", 
                            "loan_intent_encoded", 
                            "loan_grade_encoded",
-                           "loan_grade_encoded"
+                           "person_home_ownership_encoded"
                            ),
             )%>%
     
-    # Creation de vecteur de varaibles indépendantes
+    # Creation de vecteurs de varaibles indépendantes
      
      ft_vector_assembler(
          input_cols = c(  "person_age",
                           "person_income", 
-                          "imputer_load_int_rata", 
+                          "imputer_loan_int_rate", 
                           "imputer_person_emp_length",
                           "person_home_ownership_encoded", 
                            "loan_intent_encoded", 
                            "loan_grade_encoded",
                            "loan_grade_encoded",
                            "loan_amnt",
-                           " loan_percent_income", 
-                           "cb_person_cred_hist_length"
+                           "loan_percent_income", 
+                           "cb_person_cred_hist_length",
+                           "cb_person_default_on_file_encoded"
+                          
+                      
          
                        ),
          output_col = "features" 
@@ -77,6 +80,7 @@ pipline=ml_pipeline(sc) %>%
        output_col = "features_scale", 
        with_mean =TRUE 
      )%>% 
+  
   # Estimateur : algorithme de machine learning 
   
    ml_random_forest_classifier( 
@@ -84,25 +88,83 @@ pipline=ml_pipeline(sc) %>%
      label_col = "loan_status", 
      seed = seed 
      )
-```
 
+```
 # class du pipline : 
 ```{r}
 class(pipline)
 ```
 # affichage
-
 ```{r}
 pipline
 ```
+# Entrainement de ce pipline : 
+division des données en teain en test :
+```{r}
+data_splits=sdf_random_split( 
+    df, 
+    training=0.8, 
+    testing =0.2, 
+    seed =seed 
+  )
+train=data_splits$training 
+test= data_splits$testing
+sdf_nrow(train)
+sdf_nrow(test)
+```
 
 
+```{r}
+start_time =Sys.time()
+pipline_model=ml_fit( 
+  pipline,
+  train 
+  )
+end_time =Sys.time()
+print(end_time-start_time)
+```
+# prediction sur les données de test :  
 
+```{r}
+prediction= ml_predict(
+   pipline_model, 
+   test 
+)
 
+```
 
+```{r}
+prediction%>% 
+    sdf_separate_column("probability", c( "p0" ,"p1") 
+    )%>%
+  select( loan_status ,p0,p1,prediction)%>%
+  head(10)
+```
 
+## Evalution  du modèle : 
+# calcul de l'AUC 
 
+```{r}
 
+ml_binary_classification_evaluator(
+  prediction ,
+  label_col = "loan_status"
+)
+```
+
+# D'apres les resultats le modéles à 89% classer une classe positive à une positive et une négative à une négative .  
+
+```{r}
+
+grid = list( 
+  random_forest(
+    numbe = c(20,50,100),
+    max_depth = c(3,5,10), 
+    impurity = c("entropy","gini")
+  )
+)
+
+```
 
 
 
